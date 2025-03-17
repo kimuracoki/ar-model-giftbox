@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <title>&lt;model-viewer&gt; template</title>
     <meta charset="utf-8">
@@ -9,7 +9,7 @@
   </head>
   <body>
     <!-- <model-viewer> HTML element -->
-    <model-viewer src="Horse.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" autoplay>
+    <model-viewer id="viewer" src="Horse.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" autoplay>
       <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
       </div>
@@ -20,7 +20,40 @@
           <img src="ar_hand_prompt.png">
       </div>
     </model-viewer>  
-    <script src="script.js"></script>
+
+    <!-- 再生ボタン -->
+    <button id="play-audio" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 20px; font-size: 16px;">
+      🔊 音声を再生
+    </button>
+
+    <!-- Audio element -->
+    <audio id="audio" src="g_06.mp3"></audio>
+
+    <script>
+      const viewer = document.getElementById("viewer");
+      const audio = document.getElementById("audio");
+      const playButton = document.getElementById("play-audio");
+
+      // ユーザーがボタンを押すと音声を再生
+      playButton.addEventListener("click", () => {
+        audio.play().then(() => {
+          console.log("Audio playing");
+          playButton.style.display = "none"; // 一度再生したらボタンを隠す
+        }).catch(e => console.error("Audio play failed:", e));
+      });
+
+      // モデルの操作開始で音声を再生
+      viewer.addEventListener("play", () => {
+        if (!audio.paused) return;
+        audio.play().catch(e => console.error("Audio play failed:", e));
+      });
+
+      // モデルの操作停止で音声を一時停止
+      viewer.addEventListener("pause", () => {
+        audio.pause();
+      });
+    </script>
+
     <!-- Loads <model-viewer> for browsers: -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   </body>
