@@ -13,9 +13,11 @@
       <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
       </div>
-      <button slot="ar-button" id="ar-button">
+      <a href="#" id="ar-link" target="_blank">
+        <button slot="ar-button" id="ar-button">
           View in your space
-      </button>
+        </button>
+      </a>
       <div id="ar-prompt">
           <img src="ar_hand_prompt.png">
       </div>
@@ -28,36 +30,37 @@
       const viewer = document.getElementById("viewer");
       const audio = document.getElementById("audio");
       const arButton = document.getElementById("ar-button");
+      const arLink = document.getElementById("ar-link");
 
-      // **初回タップで音声再生許可を取得**
+      // **ページをタップしたら音声の再生許可を取得**
       document.body.addEventListener("click", () => {
         if (audio.paused) {
-          audio.play().then(() => {
-            console.log("Audio playing");
-          }).catch(e => console.error("Audio play failed:", e));
+          audio.play().catch(e => console.error("Audio play failed:", e));
         }
-      }, { once: true }); // 一度タップしたらリスナーを削除
+      }, { once: true });
 
-      // 3Dモデルの操作開始で音声を再生
+      // **3Dモデルの操作開始で音声を再生**
       viewer.addEventListener("play", () => {
         if (audio.paused) {
           audio.play().catch(e => console.error("Audio play failed:", e));
         }
       });
 
-      // 3Dモデルの操作停止で音声を一時停止
+      // **3Dモデルの操作停止で音声を一時停止**
       viewer.addEventListener("pause", () => {
         audio.pause();
       });
 
-      // **「View in your space」を押したときに音声再生**
+      // **「View in your space」を押したとき、新しいタブで開く**
       arButton.addEventListener("click", () => {
-        if (audio.paused) {
-          audio.play().catch(e => console.error("Audio play failed:", e));
+        const arURL = viewer.src; // GLB の URL
+        if (arURL) {
+          arLink.href = arURL;
+          arLink.click(); // 新しいタブでARを開く
         }
       });
 
-      // **ARモード中も音声が流れ続けるようにする**
+      // **ARモード中も音声を維持**
       viewer.addEventListener("ar-status", (event) => {
         if (event.detail.status === "session-started") {
           console.log("AR Mode Started");
