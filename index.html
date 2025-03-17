@@ -21,47 +21,50 @@
       </div>
     </model-viewer>  
 
-    <!-- 再生ボタン -->
-    <button id="play-audio" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 10px 20px; font-size: 16px;">
-      🔊 音声を再生
-    </button>
-
     <!-- Audio element -->
     <audio id="audio" src="g_06.mp3" loop></audio>
 
     <script>
       const viewer = document.getElementById("viewer");
       const audio = document.getElementById("audio");
-      const playButton = document.getElementById("play-audio");
+      const arButton = document.getElementById("ar-button");
 
-      // 初回のタップで音声再生を許可
-      playButton.addEventListener("click", () => {
-        audio.play().then(() => {
-          console.log("Audio playing");
-          playButton.style.display = "none"; // 一度再生したらボタンを非表示
-        }).catch(e => console.error("Audio play failed:", e));
-      });
+      // **初回タップで音声再生許可を取得**
+      document.body.addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play().then(() => {
+            console.log("Audio playing");
+          }).catch(e => console.error("Audio play failed:", e));
+        }
+      }, { once: true }); // 一度タップしたらリスナーを削除
 
-      // 3D モデルの操作開始で音声を再生
+      // 3Dモデルの操作開始で音声を再生
       viewer.addEventListener("play", () => {
         if (audio.paused) {
           audio.play().catch(e => console.error("Audio play failed:", e));
         }
       });
 
-      // 3D モデルの操作停止で音声を一時停止
+      // 3Dモデルの操作停止で音声を一時停止
       viewer.addEventListener("pause", () => {
         audio.pause();
       });
 
-      // **AR モードに入るときに音声を再生**
+      // **「View in your space」を押したときに音声再生**
+      arButton.addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play().catch(e => console.error("Audio play failed:", e));
+        }
+      });
+
+      // **ARモード中も音声が流れ続けるようにする**
       viewer.addEventListener("ar-status", (event) => {
         if (event.detail.status === "session-started") {
           console.log("AR Mode Started");
           audio.play().catch(e => console.error("Audio play failed:", e));
         } else if (event.detail.status === "not-presenting") {
           console.log("AR Mode Exited");
-          audio.pause(); // AR終了時に音声を停止
+          audio.pause();
         }
       });
     </script>
