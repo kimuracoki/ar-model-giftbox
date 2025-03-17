@@ -13,11 +13,9 @@
       <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
       </div>
-      <a href="#" id="ar-link" target="_blank">
-        <button slot="ar-button" id="ar-button">
+      <button slot="ar-button" id="ar-button">
           View in your space
-        </button>
-      </a>
+      </button>
       <div id="ar-prompt">
           <img src="ar_hand_prompt.png">
       </div>
@@ -30,7 +28,6 @@
       const viewer = document.getElementById("viewer");
       const audio = document.getElementById("audio");
       const arButton = document.getElementById("ar-button");
-      const arLink = document.getElementById("ar-link");
 
       // **ページをタップしたら音声の再生許可を取得**
       document.body.addEventListener("click", () => {
@@ -39,24 +36,19 @@
         }
       }, { once: true });
 
-      // **3Dモデルの操作開始で音声を再生**
-      viewer.addEventListener("play", () => {
-        if (audio.paused) {
-          audio.play().catch(e => console.error("Audio play failed:", e));
-        }
-      });
-
-      // **3Dモデルの操作停止で音声を一時停止**
-      viewer.addEventListener("pause", () => {
-        audio.pause();
-      });
-
-      // **「View in your space」を押したとき、新しいタブで開く**
+      // **「View in your space」を押したときに適切なAR URLを開く**
       arButton.addEventListener("click", () => {
-        const arURL = viewer.src; // GLB の URL
-        if (arURL) {
-          arLink.href = arURL;
-          arLink.click(); // 新しいタブでARを開く
+        const glbUrl = viewer.getAttribute("src");
+
+        if (navigator.userAgent.includes("Android")) {
+          // **Android → Scene Viewer を開く**
+          window.location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${window.location.origin}/${glbUrl}&mode=ar_preferred&link=${window.location.href}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+        } else if (navigator.userAgent.includes("iPhone") || navigator.userAgent.includes("iPad")) {
+          // **iOS → Quick Look を開く**
+          window.location.href = `${window.location.origin}/${glbUrl}`;
+        } else {
+          // **WebXR（PCや対応ブラウザ）**
+          viewer.activateAR();
         }
       });
 
