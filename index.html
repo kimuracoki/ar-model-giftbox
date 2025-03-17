@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <title>&lt;model-viewer&gt; template</title>
     <meta charset="utf-8">
@@ -27,30 +27,42 @@
     </button>
 
     <!-- Audio element -->
-    <audio id="audio" src="g_06.mp3"></audio>
+    <audio id="audio" src="g_06.mp3" loop></audio>
 
     <script>
       const viewer = document.getElementById("viewer");
       const audio = document.getElementById("audio");
       const playButton = document.getElementById("play-audio");
 
-      // ユーザーがボタンを押すと音声を再生
+      // 初回のタップで音声再生を許可
       playButton.addEventListener("click", () => {
         audio.play().then(() => {
           console.log("Audio playing");
-          playButton.style.display = "none"; // 一度再生したらボタンを隠す
+          playButton.style.display = "none"; // 一度再生したらボタンを非表示
         }).catch(e => console.error("Audio play failed:", e));
       });
 
-      // モデルの操作開始で音声を再生
+      // 3D モデルの操作開始で音声を再生
       viewer.addEventListener("play", () => {
-        if (!audio.paused) return;
-        audio.play().catch(e => console.error("Audio play failed:", e));
+        if (audio.paused) {
+          audio.play().catch(e => console.error("Audio play failed:", e));
+        }
       });
 
-      // モデルの操作停止で音声を一時停止
+      // 3D モデルの操作停止で音声を一時停止
       viewer.addEventListener("pause", () => {
         audio.pause();
+      });
+
+      // **AR モードに入るときに音声を再生**
+      viewer.addEventListener("ar-status", (event) => {
+        if (event.detail.status === "session-started") {
+          console.log("AR Mode Started");
+          audio.play().catch(e => console.error("Audio play failed:", e));
+        } else if (event.detail.status === "not-presenting") {
+          console.log("AR Mode Exited");
+          audio.pause(); // AR終了時に音声を停止
+        }
       });
     </script>
 
